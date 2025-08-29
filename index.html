@@ -21,6 +21,7 @@
       margin-top: 30px;
       border-collapse: collapse;
       background: rgba(20,30,60,0.9);
+      min-width: 60%;
     }
     #board th, #board td {
       border: 1px solid #446;
@@ -42,17 +43,19 @@
 
   <script>
     async function loadCSV() {
-      // ⚠️ Тут ссылка на твою таблицу, gid=0 = первый лист
-      const url = 'https://docs.google.com/spreadsheets/d/1IiYKsHtteWO0zQ2ge5F7zVWHUkUc1D1H-rpg7MABYgA/edit?usp=sharing';
-      const res = await fetch(url);
-      if (!res.ok) {
+      const url = 'https://docs.google.com/spreadsheets/d/1IiYKsHtteWO0zQ2ge5F7zVWHUkUc1D1H-rpg7MABYgA/export?format=csv&gid=0';
+      try {
+        // добавляем "cache buster", чтобы данные всегда брались свежие
+        const res = await fetch(url + "&t=" + Date.now());
+        if (!res.ok) throw new Error("Ошибка сети");
+        const text = await res.text();
+        const rows = text.trim().split(/\r?\n/);
+        const table = rows.map(line => line.split(/,|;|\t/));
+        renderTable(table);
+      } catch (e) {
         document.getElementById('board').innerHTML = '<tr><td>Ошибка загрузки данных</td></tr>';
-        return;
+        console.error(e);
       }
-      const text = await res.text();
-      const rows = text.trim().split(/\r?\n/);
-      const table = rows.map(line => line.split(/,|;|\t/));
-      renderTable(table);
     }
 
     function renderTable(data) {
@@ -69,7 +72,10 @@
       });
     }
 
+    // Загружаем таблицу при старте
     loadCSV();
+    // Обновляем каждые 30 секунд
+    setInterval(loadCSV, 30000);
   </script>
 </body>
 </html>
