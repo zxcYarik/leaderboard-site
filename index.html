@@ -1,126 +1,83 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Лидерборд</title>
-<style>
-  html, body {
-    margin: 0; padding: 0;
-    height: 100%; width: 100%;
-    background: #0b1020;
-    color: #fff;
-    font-family: sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-  }
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Лидерборд</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      background: #0b1020;
+      color: #fff;
+      font-family: sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
 
-  #board {
-    margin-top: 30px;
-    border-collapse: collapse;
-    background: rgba(20,30,60,0.9);
-    min-width: 60%;
-  }
+    #board {
+      margin-top: 30px;
+      border-collapse: collapse;
+      background: rgba(20,30,60,0.9);
+      min-width: 60%;
+    }
 
-  #board th, #board td {
-    border: 1px solid #446;
-    padding: 8px 12px;
-    text-align: center;
-  }
+    #board th, #board td {
+      border: 1px solid #446;
+      padding: 8px 12px;
+      text-align: center;
+    }
 
-  #board th {
-    background: #334;
-    font-size: 1.1em;
-  }
+    #board th {
+      background: #334;
+      font-size: 1.1em;
+    }
 
-  #board td {
-    background: #223;
-    font-size: 1em;
-  }
-
-  /* Подсветка топ-3 */
-  .top1 { background: linear-gradient(90deg, #00ff00, #22cc22); font-weight: bold; }
-  .top2 { background: linear-gradient(90deg, #66ff66, #44cc44); font-weight: bold; }
-  .top3 { background: linear-gradient(90deg, #99ff99, #77cc77); font-weight: bold; }
-
-  /* Нижние границы */
-  .low1 { background: yellow; font-weight: bold; }
-  .low2 { background: red; font-weight: bold; }
-</style>
+    #board td {
+      background: #223;
+      font-size: 1em;
+    }
+  </style>
 </head>
 <body>
-<table id="board"></table>
+  <table id="board"></table>
 
-<script>
-async function loadCSV() {
-  const url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSm9UDeOeEQ61iJvCgB0jtnOcYoinpOdpN6AdL0rHLn22lpo0_JylOaDamiphnvQQbiraj9BKZEFx8d/pub?output=csv';
-  try {
-    const res = await fetch(url + '&t=' + Date.now());
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const text = await res.text();
-    const rows = text.trim().split(/\r?\n/);
-    const table = rows.map(r => r.split(/,|;|\t/));
-
-    // Находим топ-3 по второму столбцу
-    const dataRows = table.slice(1).map(r => ({row: r, value: parseFloat(r[1].replace(/\s+/g, '')) || 0}));
-    dataRows.sort((a,b) => b.value - a.value); // сортируем по убыванию
-    const top3 = dataRows.slice(0,3);
-
-    renderTable(table[0], dataRows, top3);
-  } catch (e) {
-    console.error(e);
-    document.getElementById('board').innerHTML = '<tr><td>Ошибка загрузки данных</td></tr>';
-  }
-}
-
-function renderTable(header, rows, top3) {
-  const tbl = document.getElementById('board');
-  tbl.innerHTML = '';
-
-  // Заголовок
-  const trHead = document.createElement('tr');
-  header.forEach(cell => {
-    const th = document.createElement('th');
-    th.textContent = cell;
-    trHead.appendChild(th);
-  });
-  tbl.appendChild(trHead);
-
-  // Данные
-  rows.forEach((obj) => {
-    const tr = document.createElement('tr');
-
-    obj.row.forEach((cell, j) => {
-      const td = document.createElement('td');
-      td.textContent = cell;
-
-      const val = parseFloat(obj.row[1].replace(/\s+/g, '')) || 0;
-
-      // Подсветка топ-3
-      if (top3.includes(obj)) {
-        const rank = top3.indexOf(obj);
-        if (rank === 0) td.parentElement.classList.add('top1');
-        else if (rank === 1) td.parentElement.classList.add('top2');
-        else if (rank === 2) td.parentElement.classList.add('top3');
+  <script>
+    async function loadCSV() {
+      const url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSm9UDeOeEQ61iJvCgB0jtnOcYoinpOdpN6AdL0rHLn22lpo0_JylOaDamiphnvQQbiraj9BKZEFx8d/pub?output=csv';
+      try {
+        const res = await fetch(url + '&t=' + Date.now()); // кеш-бастер
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const text = await res.text();
+        const rows = text.trim().split(/\r?\n/);
+        const table = rows.map(r => r.split(/,|;|\t/));
+        renderTable(table);
+      } catch (e) {
+        console.error(e);
+        document.getElementById('board').innerHTML = '<tr><td>Ошибка загрузки данных</td></tr>';
       }
+    }
 
-      // Нижние границы
-      if (j === 1) {
-        if (val < 4000) td.classList.add('low2');
-        else if (val < 10000) td.classList.add('low1');
-      }
+    function renderTable(data) {
+      const tbl = document.getElementById('board');
+      tbl.innerHTML = '';
+      data.forEach((row, i) => {
+        const tr = document.createElement('tr');
+        row.forEach(cell => {
+          const el = document.createElement(i === 0 ? 'th' : 'td');
+          el.textContent = cell;
+          tr.appendChild(el);
+        });
+        tbl.appendChild(tr);
+      });
+    }
 
-      tr.appendChild(td);
-    });
-
-    tbl.appendChild(tr);
-  });
-}
-
-// Инициализация и автообновление
-loadCSV();
-setInterval(loadCSV, 30000);
-</script>
+    loadCSV();
+    // Автообновление каждые 30 секунд
+    setInterval(loadCSV, 30000);
+  </script>
 </body>
 </html>
