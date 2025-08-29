@@ -1,83 +1,110 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Лидерборд</title>
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      width: 100%;
-      background: #0b1020;
-      color: #fff;
-      font-family: sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-    }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Лидерборд</title>
+<style>
+  html, body {
+    margin: 0; padding: 0;
+    height: 100%; width: 100%;
+    background: #0b1020;
+    color: #fff;
+    font-family: sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+  }
 
-    #board {
-      margin-top: 30px;
-      border-collapse: collapse;
-      background: rgba(20,30,60,0.9);
-      min-width: 60%;
-    }
+  #board {
+    margin-top: 30px;
+    border-collapse: collapse;
+    background: rgba(20,30,60,0.9);
+    min-width: 60%;
+  }
 
-    #board th, #board td {
-      border: 1px solid #446;
-      padding: 8px 12px;
-      text-align: center;
-    }
+  #board th, #board td {
+    border: 1px solid #446;
+    padding: 8px 12px;
+    text-align: center;
+  }
 
-    #board th {
-      background: #334;
-      font-size: 1.1em;
-    }
+  #board th {
+    background: #334;
+    font-size: 1.1em;
+  }
 
-    #board td {
-      background: #223;
-      font-size: 1em;
-    }
-  </style>
+  #board td {
+    background: #223;
+    font-size: 1em;
+  }
+
+  /* Подсветка топ-3 */
+  .top1 { background: linear-gradient(90deg, #00ff00, #22cc22); font-weight: bold; }
+  .top2 { background: linear-gradient(90deg, #66ff66, #44cc44); font-weight: bold; }
+  .top3 { background: linear-gradient(90deg, #99ff99, #77cc77); font-weight: bold; }
+
+  /* Нижние границы */
+  .low1 { background: yellow; font-weight: bold; }
+  .low2 { background: red; font-weight: bold; }
+</style>
 </head>
 <body>
-  <table id="board"></table>
+<table id="board"></table>
 
-  <script>
-    async function loadCSV() {
-      const url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSm9UDeOeEQ61iJvCgB0jtnOcYoinpOdpN6AdL0rHLn22lpo0_JylOaDamiphnvQQbiraj9BKZEFx8d/pub?output=csv';
-      try {
-        const res = await fetch(url + '&t=' + Date.now()); // кеш-бастер
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const text = await res.text();
-        const rows = text.trim().split(/\r?\n/);
-        const table = rows.map(r => r.split(/,|;|\t/));
-        renderTable(table);
-      } catch (e) {
-        console.error(e);
-        document.getElementById('board').innerHTML = '<tr><td>Ошибка загрузки данных</td></tr>';
+<script>
+async function loadCSV() {
+  const url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSm9UDeOeEQ61iJvCgB0jtnOcYoinpOdpN6AdL0rHLn22lpo0_JylOaDamiphnvQQbiraj9BKZEFx8d/pub?output=csv';
+  try {
+    const res = await fetch(url + '&t=' + Date.now());
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    const rows = text.trim().split(/\r?\n/);
+    const table = rows.map(r => r.split(/,|;|\t/));
+    renderTable(table);
+  } catch (e) {
+    console.error(e);
+    document.getElementById('board').innerHTML = '<tr><td>Ошибка загрузки данных</td></tr>';
+  }
+}
+
+function renderTable(data) {
+  const tbl = document.getElementById('board');
+  tbl.innerHTML = '';
+
+  data.forEach((row, i) => {
+    const tr = document.createElement('tr');
+
+    row.forEach((cell, j) => {
+      const el = document.createElement(i === 0 ? 'th' : 'td');
+      el.textContent = cell;
+
+      // Подсветка топ-3 (только для строк, не для заголовка)
+      if (i > 0) {
+        if (i === 1) el.parentElement.classList.add('top1');
+        else if (i === 2) el.parentElement.classList.add('top2');
+        else if (i === 3) el.parentElement.classList.add('top3');
+
+        // Проверка второго столбца на значения
+        if (j === 1) {
+          const val = parseFloat(cell.replace(/\s+/g, ''));
+          if (!isNaN(val)) {
+            if (val < 4000) el.classList.add('low2');
+            else if (val < 10000) el.classList.add('low1');
+          }
+        }
       }
-    }
 
-    function renderTable(data) {
-      const tbl = document.getElementById('board');
-      tbl.innerHTML = '';
-      data.forEach((row, i) => {
-        const tr = document.createElement('tr');
-        row.forEach(cell => {
-          const el = document.createElement(i === 0 ? 'th' : 'td');
-          el.textContent = cell;
-          tr.appendChild(el);
-        });
-        tbl.appendChild(tr);
-      });
-    }
+      tr.appendChild(el);
+    });
 
-    loadCSV();
-    // Автообновление каждые 30 секунд
-    setInterval(loadCSV, 30000);
-  </script>
+    tbl.appendChild(tr);
+  });
+}
+
+// Инициализация и автообновление
+loadCSV();
+setInterval(loadCSV, 30000); // каждые 30 секунд
+</script>
 </body>
 </html>
