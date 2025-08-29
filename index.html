@@ -6,64 +6,27 @@
   <title>Лидерборд</title>
   <style>
     html, body {
-      margin: 0; padding: 0;
-      height: 100%; width: 100%;
-      background: #0b1020; color: #fff;
-      font-family: sans-serif;
-      display: flex; justify-content: center; align-items: flex-start;
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      background: #0b1020;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start; /* таблица сверху */
     }
-    #board {
-      margin-top: 30px;
-      border-collapse: collapse;
-      background: rgba(20,30,60,0.9);
-      min-width: 60%;
+    iframe {
+      margin-top: 20px;
+      border: none;
+      width: 90%;
+      height: 90vh; /* почти весь экран по вертикали */
     }
-    #board th, #board td {
-      border: 1px solid #446;
-      padding: 8px 12px;
-      text-align: center;
-    }
-    #board th { background: #334; font-size: 1.1em; }
-    #board td { background: #223; font-size: 1em; }
   </style>
 </head>
 <body>
-  <table id="board"></table>
-
-  <script>
-    async function loadCSV() {
-      const url = './data.csv'; // локальный CSV
-      try {
-        const res = await fetch(url + '?t=' + Date.now()); // кеш-бастер
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const text = await res.text();
-        const rows = text.trim().split(/\r?\n/);
-        const table = rows.map(r => r.split(/,|;|\t/));
-        renderTable(table);
-      } catch (e) {
-        console.error(e);
-        document.getElementById('board').innerHTML = '<tr><td>Ошибка загрузки данных</td></tr>';
-      }
-    }
-
-    function renderTable(data) {
-      const tbl = document.getElementById('board');
-      tbl.innerHTML = '';
-      data.forEach((row, i) => {
-        const tr = document.createElement('tr');
-        row.forEach(cell => {
-          const el = document.createElement(i === 0 ? 'th' : 'td');
-          el.textContent = cell;
-          tr.appendChild(el);
-        });
-        tbl.appendChild(tr);
-      });
-    }
-
-    // Загружаем таблицу при старте
-    loadCSV();
-    // Автообновление каждые 30 секунд
-    setInterval(loadCSV, 30000);
-  </script>
+  <!-- Вставляем Google Sheets через iframe -->
+  <iframe 
+    src="https://docs.google.com/spreadsheets/d/e/2PACX-1vSm9UDeOeEQ61iJvCgB0jtnOcYoinpOdpN6AdL0rHLn22lpo0_JylOaDamiphnvQQbiraj9BKZEFx8d/pubhtml?widget=true&amp;headers=false">
+  </iframe>
 </body>
 </html>
