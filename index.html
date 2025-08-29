@@ -61,41 +61,57 @@ async function loadCSV() {
     const text = await res.text();
     const rows = text.trim().split(/\r?\n/);
     const table = rows.map(r => r.split(/,|;|\t/));
-    renderTable(table);
+
+    // Находим топ-3 по второму столбцу
+    const dataRows = table.slice(1).map(r => ({row: r, value: parseFloat(r[1].replace(/\s+/g, '')) || 0}));
+    dataRows.sort((a,b) => b.value - a.value); // сортируем по убыванию
+    const top3 = dataRows.slice(0,3);
+
+    renderTable(table[0], dataRows, top3);
   } catch (e) {
     console.error(e);
     document.getElementById('board').innerHTML = '<tr><td>Ошибка загрузки данных</td></tr>';
   }
 }
 
-function renderTable(data) {
+function renderTable(header, rows, top3) {
   const tbl = document.getElementById('board');
   tbl.innerHTML = '';
 
-  data.forEach((row, i) => {
+  // Заголовок
+  const trHead = document.createElement('tr');
+  header.forEach(cell => {
+    const th = document.createElement('th');
+    th.textContent = cell;
+    trHead.appendChild(th);
+  });
+  tbl.appendChild(trHead);
+
+  // Данные
+  rows.forEach((obj) => {
     const tr = document.createElement('tr');
 
-    row.forEach((cell, j) => {
-      const el = document.createElement(i === 0 ? 'th' : 'td');
-      el.textContent = cell;
+    obj.row.forEach((cell, j) => {
+      const td = document.createElement('td');
+      td.textContent = cell;
 
-      // Подсветка топ-3 (только для строк, не для заголовка)
-      if (i > 0) {
-        if (i === 1) el.parentElement.classList.add('top1');
-        else if (i === 2) el.parentElement.classList.add('top2');
-        else if (i === 3) el.parentElement.classList.add('top3');
+      const val = parseFloat(obj.row[1].replace(/\s+/g, '')) || 0;
 
-        // Проверка второго столбца на значения
-        if (j === 1) {
-          const val = parseFloat(cell.replace(/\s+/g, ''));
-          if (!isNaN(val)) {
-            if (val < 4000) el.classList.add('low2');
-            else if (val < 10000) el.classList.add('low1');
-          }
-        }
+      // Подсветка топ-3
+      if (top3.includes(obj)) {
+        const rank = top3.indexOf(obj);
+        if (rank === 0) td.parentElement.classList.add('top1');
+        else if (rank === 1) td.parentElement.classList.add('top2');
+        else if (rank === 2) td.parentElement.classList.add('top3');
       }
 
-      tr.appendChild(el);
+      // Нижние границы
+      if (j === 1) {
+        if (val < 4000) td.classList.add('low2');
+        else if (val < 10000) td.classList.add('low1');
+      }
+
+      tr.appendChild(td);
     });
 
     tbl.appendChild(tr);
@@ -104,7 +120,7 @@ function renderTable(data) {
 
 // Инициализация и автообновление
 loadCSV();
-setInterval(loadCSV, 30000); // каждые 30 секунд
+setInterval(loadCSV, 30000);
 </script>
 </body>
 </html>
