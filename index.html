@@ -16,6 +16,7 @@
       margin-top: 30px;
       border-collapse: collapse;
       background: rgba(20,30,60,0.9);
+      min-width: 60%;
     }
     #board th, #board td {
       border: 1px solid #446;
@@ -28,11 +29,12 @@
 </head>
 <body>
   <table id="board"></table>
+
   <script>
     async function loadCSV() {
-      const url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSm9UDeOeEQ61iJvCgB0jtnOcYoinpOdpN6AdL0rHLn22lpo0_JylOaDamiphnvQQbiraj9BKZEFx8d/pub?output=csv';
+      const url = './data.csv'; // локальный CSV
       try {
-        const res = await fetch(url + '&t=' + Date.now());
+        const res = await fetch(url + '?t=' + Date.now()); // кеш-бастер
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const text = await res.text();
         const rows = text.trim().split(/\r?\n/);
@@ -58,9 +60,10 @@
       });
     }
 
-    // Инициализируем и обновляем
+    // Загружаем таблицу при старте
     loadCSV();
-    setInterval(loadCSV, 30000); // каждые 30 секунд
+    // Автообновление каждые 30 секунд
+    setInterval(loadCSV, 30000);
   </script>
 </body>
 </html>
