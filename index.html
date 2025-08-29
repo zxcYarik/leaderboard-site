@@ -43,7 +43,7 @@
 
   <script>
     async function loadCSV() {
-      const url = 'https://docs.google.com/spreadsheets/d/1IiYKsHtteWO0zQ2ge5F7zVWHUkUc1D1H-rpg7MABYgA/export?format=csv&gid=0';
+      const url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSm9UDeOeEQ61iJvCgB0jtnOcYoinpOdpN6AdL0rHLn22lpo0_JylOaDamiphnvQQbiraj9BKZEFx8d/pubhtml';
       try {
         // добавляем "cache buster", чтобы данные всегда брались свежие
         const res = await fetch(url + "&t=" + Date.now());
