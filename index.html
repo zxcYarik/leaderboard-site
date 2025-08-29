@@ -43,7 +43,7 @@
   <script>
     async function loadCSV() {
       // ⚠️ Тут ссылка на твою таблицу, gid=0 = первый лист
-      const url = 'https://docs.google.com/spreadsheets/d/1uIq7wKcrikT6Oh5tzDslQb_CQ0ccAFKNFDEyiovhEa8/export?format=csv&gid=0';
+      const url = 'https://docs.google.com/spreadsheets/d/1IiYKsHtteWO0zQ2ge5F7zVWHUkUc1D1H-rpg7MABYgA/edit?usp=sharing';
       const res = await fetch(url);
       if (!res.ok) {
         document.getElementById('board').innerHTML = '<tr><td>Ошибка загрузки данных</td></tr>';
