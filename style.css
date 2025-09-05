@@ -1,0 +1,45 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  background: #0b1020;
+  color: #fff;
+  font-family: sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+#board {
+  margin-top: 30px;
+  border-collapse: collapse;
+  background: rgba(20,30,60,0.9);
+  min-width: 60%;
+}
+
+#board th, #board td {
+  border: 1px solid #446;
+  padding: 8px 12px;
+  text-align: center;
+}
+
+#board th {
+  background: #334;
+  font-size: 1.1em;
+}
+
+#board td {
+  background: #223;
+  font-size: 1em;
+}
+/* Анимация плавного появления/исчезновения */
+.fade-out {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.fade-in {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
