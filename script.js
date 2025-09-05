@@ -121,17 +121,22 @@ document.querySelector('.next').addEventListener('click', () => {
 });
 
 // Кнопка паузы
-const pauseBtn = document.querySelector('.pause-btn');
-pauseBtn.addEventListener('click', () => {
-  if (isPaused) {
-    startAutoSlide();
-    pauseBtn.textContent = '⏸️ Пауза';
-  } else {
-    stopAutoSlide();
-    pauseBtn.textContent = '▶️ Играть';
-  }
-  isPaused = !isPaused;
+document.addEventListener('DOMContentLoaded', () => {
+  const pauseBtn = document.querySelector('.pause-btn');
+  pauseBtn.addEventListener('click', () => {
+    if (isPaused) {
+      startAutoSlide();
+      pauseBtn.textContent = '⏸️ Пауза';
+    } else {
+      stopAutoSlide();
+      pauseBtn.textContent = '▶️ Играть';
+    }
+    isPaused = !isPaused;
+  });
+
+  loadAllSheets();
 });
+
 
 function startAutoSlide() {
   stopAutoSlide();
