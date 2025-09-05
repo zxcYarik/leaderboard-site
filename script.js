@@ -1,7 +1,5 @@
-// Сюда добавь ссылки на Google Sheets
 const sheetUrls = [
   'https://docs.google.com/spreadsheets/d/e/2PACX-1vSm9UDeOeEQ61iJvCgB0jtnOcYoinpOdpN6AdL0rHLn22lpo0_JylOaDamiphnvQQbiraj9BKZEFx8d/pub?output=csv',
-  // можно добавить ещё ссылки
 ];
 
 let currentIndex = 0;
@@ -10,7 +8,7 @@ let slides = [];
 async function loadAllSheets() {
   const container = document.getElementById('slider-content');
   container.innerHTML = '';
-  slides = []; // сбрасываем массив
+  slides = [];
 
   for (let url of sheetUrls) {
     const data = await loadCSV(url);
@@ -66,7 +64,6 @@ function showSlide(index) {
   currentIndex = index;
 }
 
-// Навигация
 document.querySelector('.prev').addEventListener('click', () => {
   if (slides.length > 0) {
     showSlide((currentIndex - 1 + slides.length) % slides.length);
@@ -79,7 +76,6 @@ document.querySelector('.next').addEventListener('click', () => {
   }
 });
 
-// Автопереключение каждые 10 секунд
 setInterval(() => {
   if (slides.length > 0) {
     showSlide((currentIndex + 1) % slides.length);
