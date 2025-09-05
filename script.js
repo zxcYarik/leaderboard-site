@@ -1,6 +1,7 @@
-// Добавили две ссылки: первая и вторая таблица (новая)
 const sheetUrls = [
+  // 1-й слайд: таблица
   'https://docs.google.com/spreadsheets/d/e/2PACX-1vSm9UDeOeEQ61iJvCgB0jtnOcYoinpOdpN6AdL0rHLn22lpo0_JylOaDamiphnvQQbiraj9BKZEFx8d/pub?output=csv',
+  // 2-й слайд: лидер дня
   'https://docs.google.com/spreadsheets/d/e/2PACX-1vSm9UDeOeEQ61iJvCgB0jtnOcYoinpOdpN6AdL0rHLn22lpo0_JylOaDamiphnvQQbiraj9BKZEFx8d/pub?gid=644491547&single=true&output=csv'
 ];
 
@@ -12,13 +13,21 @@ async function loadAllSheets() {
   container.innerHTML = '';
   slides = [];
 
-  for (let url of sheetUrls) {
-    const data = await loadCSV(url);
-    const table = renderTable(data);
+  for (let i = 0; i < sheetUrls.length; i++) {
+    const data = await loadCSV(sheetUrls[i]);
+    let content;
+
+    if (i === 0) {
+      // первый слайд = таблица
+      content = renderTable(data);
+    } else {
+      // второй слайд = карточка лидера дня
+      content = renderLeaderCard(data);
+    }
 
     const slide = document.createElement('div');
     slide.classList.add('slide');
-    slide.appendChild(table);
+    slide.appendChild(content);
 
     container.appendChild(slide);
     slides.push(slide);
@@ -54,6 +63,53 @@ function renderTable(data) {
     tbl.appendChild(tr);
   });
   return tbl;
+}
+
+function renderLeaderCard(data) {
+  // предполагаем, что заголовки в первой строке
+  const headers = data[0];
+  const rows = data.slice(1);
+
+  // ищем колонку "Очки" (или "Score")
+  const scoreIndex = headers.findIndex(h => /очк|score/i.test(h));
+  if (scoreIndex === -1) {
+    return document.createTextNode("Не найдена колонка 'Очки'");
+  }
+
+  // находим лидера
+  let leader = rows[0];
+  let maxScore = parseFloat(rows[0][scoreIndex]) || 0;
+
+  for (let r of rows) {
+    const score = parseFloat(r[scoreIndex]) || 0;
+    if (score > maxScore) {
+      maxScore = score;
+      leader = r;
+    }
+  }
+
+  // создаём карточку
+  const card = document.createElement('div');
+  card.classList.add('leader-card');
+
+  const nameIndex = headers.findIndex(h => /имя|name/i.test(h));
+  const name = nameIndex !== -1 ? leader[nameIndex] : 'Неизвестный';
+
+  const title = document.createElement('h2');
+  title.textContent = 'Лидер дня';
+
+  const player = document.createElement('p');
+  player.textContent = `Игрок: ${name}`;
+
+  const score = document.createElement('p');
+  score.classList.add('score');
+  score.textContent = `Очки: ${maxScore}`;
+
+  card.appendChild(title);
+  card.appendChild(player);
+  card.appendChild(score);
+
+  return card;
 }
 
 function showSlide(index) {
