@@ -10,6 +10,7 @@ let slides = [];
 async function loadAllSheets() {
   const container = document.getElementById('slider-content');
   container.innerHTML = '';
+  slides = []; // сбрасываем массив
 
   for (let url of sheetUrls) {
     const data = await loadCSV(url);
@@ -23,8 +24,9 @@ async function loadAllSheets() {
     slides.push(slide);
   }
 
+  // показываем первый слайд
   if (slides.length > 0) {
-    slides[0].classList.add('active');
+    showSlide(0);
   }
 }
 
@@ -65,17 +67,24 @@ function showSlide(index) {
   currentIndex = index;
 }
 
+// Навигация
 document.querySelector('.prev').addEventListener('click', () => {
-  showSlide((currentIndex - 1 + slides.length) % slides.length);
+  if (slides.length > 0) {
+    showSlide((currentIndex - 1 + slides.length) % slides.length);
+  }
 });
 
 document.querySelector('.next').addEventListener('click', () => {
-  showSlide((currentIndex + 1) % slides.length);
+  if (slides.length > 0) {
+    showSlide((currentIndex + 1) % slides.length);
+  }
 });
 
 // Автопереключение каждые 10 секунд
 setInterval(() => {
-  showSlide((currentIndex + 1) % slides.length);
+  if (slides.length > 0) {
+    showSlide((currentIndex + 1) % slides.length);
+  }
 }, 10000);
 
 loadAllSheets();
