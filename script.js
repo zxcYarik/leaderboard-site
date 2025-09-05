@@ -1,20 +1,48 @@
-async function loadCSV() {
-  const url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSm9UDeOeEQ61iJvCgB0jtnOcYoinpOdpN6AdL0rHLn22lpo0_JylOaDamiphnvQQbiraj9BKZEFx8d/pub?output=csv';
+// Сюда добавь ссылки на Google Sheets
+const sheetUrls = [
+  'https://docs.google.com/spreadsheets/d/e/2PACX-1vSm9UDeOeEQ61iJvCgB0jtnOcYoinpOdpN6AdL0rHLn22lpo0_JylOaDamiphnvQQbiraj9BKZEFx8d/pub?output=csv',
+  // можно добавить ещё ссылки
+];
+
+let currentIndex = 0;
+let slides = [];
+
+async function loadAllSheets() {
+  const container = document.getElementById('slider-content');
+  container.innerHTML = '';
+
+  for (let url of sheetUrls) {
+    const data = await loadCSV(url);
+    const table = renderTable(data);
+
+    const slide = document.createElement('div');
+    slide.classList.add('slide');
+    slide.appendChild(table);
+
+    container.appendChild(slide);
+    slides.push(slide);
+  }
+
+  if (slides.length > 0) {
+    slides[0].classList.add('active');
+  }
+}
+
+async function loadCSV(url) {
   try {
-    const res = await fetch(url + '&t=' + Date.now()); // кеш-бастер
+    const res = await fetch(url + '&t=' + Date.now());
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const text = await res.text();
     const rows = text.trim().split(/\r?\n/);
-    const table = rows.map(r => r.split(/,|;|\t/));
-    renderTable(table);
+    return rows.map(r => r.split(/,|;|\t/));
   } catch (e) {
     console.error(e);
-    document.getElementById('board').innerHTML = '<tr><td>Ошибка загрузки данных</td></tr>';
+    return [['Ошибка загрузки']];
   }
 }
 
 function renderTable(data) {
-  const tbl = document.createElement('table'); // создаём временную таблицу
+  const tbl = document.createElement('table');
   data.forEach((row, i) => {
     const tr = document.createElement('tr');
     row.forEach(cell => {
@@ -24,19 +52,30 @@ function renderTable(data) {
     });
     tbl.appendChild(tr);
   });
-
-  const board = document.getElementById('board');
-  
-  // плавная замена контента
-  board.classList.add('fade-out');
-  setTimeout(() => {
-    board.innerHTML = tbl.innerHTML;
-    board.classList.remove('fade-out');
-    board.classList.add('fade-in');
-    setTimeout(() => board.classList.remove('fade-in'), 300);
-  }, 300);
+  return tbl;
 }
 
-loadCSV();
-// Автообновление каждые 5 минут
-setInterval(loadCSV, 300000);
+function showSlide(index) {
+  slides.forEach((slide, i) => {
+    slide.classList.remove('active');
+    if (i === index) {
+      slide.classList.add('active');
+    }
+  });
+  currentIndex = index;
+}
+
+document.querySelector('.prev').addEventListener('click', () => {
+  showSlide((currentIndex - 1 + slides.length) % slides.length);
+});
+
+document.querySelector('.next').addEventListener('click', () => {
+  showSlide((currentIndex + 1) % slides.length);
+});
+
+// Автопереключение каждые 10 секунд
+setInterval(() => {
+  showSlide((currentIndex + 1) % slides.length);
+}, 10000);
+
+loadAllSheets();
