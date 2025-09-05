@@ -24,7 +24,6 @@ async function loadAllSheets() {
     slides.push(slide);
   }
 
-  // показываем первый слайд
   if (slides.length > 0) {
     showSlide(0);
   }
