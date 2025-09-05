@@ -40,7 +40,6 @@ body {
   font-size: 1em;
 }
 
-/* Анимация плавной смены */
 .slide {
   display: none;
   opacity: 0;
@@ -52,7 +51,6 @@ body {
   opacity: 1;
 }
 
-/* Кнопки навигации */
 .nav {
   position: absolute;
   top: 50%;
