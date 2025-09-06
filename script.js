@@ -66,55 +66,51 @@ function renderTable(data) {
 }
 
 function renderLeaderCard(data) {
+  // предполагаем, что заголовки в первой строке
   const headers = data[0];
   const rows = data.slice(1);
 
-  // Берём первую (и единственную) строку — лидера дня
-  const leader = rows[0];
+  // ищем колонку "Очки" (или "Score")
+  const scoreIndex = headers.findIndex(h => /очк|score/i.test(h));
+  if (scoreIndex === -1) {
+    return document.createTextNode("Не найдена колонка 'Очки'");
+  }
 
-  // Находим индексы нужных колонок
-  const nameIndex = headers.indexOf("Лидер дня (ФИО)");
-  const scoreIndex = headers.indexOf("Сумма чистыми");
-  const dateIndex = headers.indexOf("Дата");
-  const serviceIndex = headers.indexOf("Услуга");
-  const commentIndex = headers.indexOf("Комментарий / Эмодзи");
+  // находим лидера
+  let leader = rows[0];
+  let maxScore = parseFloat(rows[0][scoreIndex]) || 0;
 
-  // Получаем значения
-  const name = nameIndex !== -1 ? leader[nameIndex] : 'Неизвестный';
-  const score = scoreIndex !== -1 ? leader[scoreIndex] : '0';
-  const date = dateIndex !== -1 ? leader[dateIndex] : '';
-  const service = serviceIndex !== -1 ? leader[serviceIndex] : '';
-  const comment = commentIndex !== -1 ? leader[commentIndex] : '';
+  for (let r of rows) {
+    const score = parseFloat(r[scoreIndex]) || 0;
+    if (score > maxScore) {
+      maxScore = score;
+      leader = r;
+    }
+  }
 
-  // Создаём карточку
+  // создаём карточку
   const card = document.createElement('div');
   card.classList.add('leader-card');
 
+  const nameIndex = headers.findIndex(h => /имя|name/i.test(h));
+  const name = nameIndex !== -1 ? leader[nameIndex] : 'Неизвестный';
+
   const title = document.createElement('h2');
-  title.textContent = `Лидер дня (${date})`;
+  title.textContent = 'Лидер дня';
 
   const player = document.createElement('p');
   player.textContent = `Игрок: ${name}`;
 
-  const sum = document.createElement('p');
-  sum.classList.add('score');
-  sum.textContent = `Сумма: ${score}`;
-
-  const serviceEl = document.createElement('p');
-  serviceEl.textContent = `Услуга: ${service}`;
-
-  const commentEl = document.createElement('p');
-  commentEl.textContent = comment;
+  const score = document.createElement('p');
+  score.classList.add('score');
+  score.textContent = `Очки: ${maxScore}`;
 
   card.appendChild(title);
   card.appendChild(player);
-  card.appendChild(sum);
-  card.appendChild(serviceEl);
-  card.appendChild(commentEl);
+  card.appendChild(score);
 
   return card;
 }
-
 
 function showSlide(index) {
   slides.forEach((slide, i) => {
