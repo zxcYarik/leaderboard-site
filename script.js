@@ -1,8 +1,8 @@
 const sheetUrls = [
   // 1-й слайд: таблица
-  'https://docs.google.com/spreadsheets/d/e/2PACX-1vSm9UDeOeEQ61iJvCgB0jtnOcYoinpOdpN6AdL0rHLn22lpo0_JylOaDamiphnvQQbiraj9BKZEFx8d/pub?output=csv',
+  'вставте ссылку формата CSV',
   // 2-й слайд: лидер дня
-  'https://docs.google.com/spreadsheets/d/e/2PACX-1vSm9UDeOeEQ61iJvCgB0jtnOcYoinpOdpN6AdL0rHLn22lpo0_JylOaDamiphnvQQbiraj9BKZEFx8d/pub?gid=644491547&single=true&output=csv'
+  'вставте ссылку формата CSV'
 ];
 
 let currentIndex = 0;
@@ -64,17 +64,25 @@ function renderTable(data) {
   });
   return tbl;
 }
-
+//Сдесь
+//был
+//Ярик
 function renderLeaderCard(data) {
-  // предполагаем, что заголовки в первой строке
-  const headers = data[0];
-  const rows = data.slice(1);
-
-  // ищем колонку "Очки" (или "Score")
-  const scoreIndex = headers.findIndex(h => /очк|score/i.test(h));
-  if (scoreIndex === -1) {
-    return document.createTextNode("Не найдена колонка 'Очки'");
+  if (!data || data.length < 2) {
+    return document.createTextNode("Нет данных для лидера");
   }
+
+  const headers = data[0].map(h => h.trim()); // убираем лишние пробелы
+  const rows = data.slice(1).filter(r => r.some(cell => cell.trim() !== ''));
+
+  // ищем колонку с очками
+  const scoreIndex = headers.findIndex(h => /очк|score|points/i.test(h));
+  if (scoreIndex === -1) {
+    return document.createTextNode("Не найдена колонка с очками");
+  }
+
+  // ищем колонку с именем
+  const nameIndex = headers.findIndex(h => /имя|name|player/i.test(h));
 
   // находим лидера
   let leader = rows[0];
@@ -92,14 +100,12 @@ function renderLeaderCard(data) {
   const card = document.createElement('div');
   card.classList.add('leader-card');
 
-  const nameIndex = headers.findIndex(h => /имя|name/i.test(h));
-  const name = nameIndex !== -1 ? leader[nameIndex] : 'Неизвестный';
-
   const title = document.createElement('h2');
   title.textContent = 'Лидер дня';
 
+  const playerName = nameIndex !== -1 ? leader[nameIndex] : 'Неизвестный';
   const player = document.createElement('p');
-  player.textContent = `Игрок: ${name}`;
+  player.textContent = `Игрок: ${playerName}`;
 
   const score = document.createElement('p');
   score.classList.add('score');
