@@ -1,34 +1,34 @@
 const sheetUrls = [
-  // 1-й слайд: таблица
-  'вставте ссылку формата CSV',
-  // 2-й слайд: лидер дня
-  'вставте ссылку формата CSV'
+  'https://docs.google.com/spreadsheets/d/1xHFYwwGnkzjc9silmNPKpUDNbbYdHPQ3y0B20hvkRio/edit?usp=sharing',
+  'https://docs.google.com/spreadsheets/d/16qzBLyi0hvPna5YPZxIqfBi_HYl4ezUarPLR97k6RWQ/edit?usp=sharing'
 ];
 
 let currentIndex = 0;
 let slides = [];
 
-async function loadAllSheets() {
+function loadAllSheets() {
   const container = document.getElementById('slider-content');
   container.innerHTML = '';
   slides = [];
 
   for (let i = 0; i < sheetUrls.length; i++) {
-    const data = await loadCSV(sheetUrls[i]);
-    let content;
-
-    if (i === 0) {
-      // первый слайд = таблица
-      content = renderTable(data);
-    } else {
-      // второй слайд = карточка лидера дня
-      content = renderLeaderCard(data);
-    }
-
     const slide = document.createElement('div');
     slide.classList.add('slide');
-    slide.appendChild(content);
 
+    const iframe = document.createElement('iframe');
+    iframe.src = sheetUrls[i] + '&t=' + Date.now();
+    iframe.width = '100%';
+    iframe.height = '6000px';
+    iframe.frameBorder = '0';
+    iframe.allowFullscreen = true;
+    iframe.onload = () => console.log('Iframe loaded for slide ' + i);
+    iframe.onerror = () => {
+      console.error('Iframe failed to load for slide ' + i);
+
+      slide.innerHTML = '<p>Не удалось загрузить файл. <a href="' + sheetUrls[i] + '" target="_blank">Открыть в новой вкладке</a></p>';
+    };
+
+    slide.appendChild(iframe);
     container.appendChild(slide);
     slides.push(slide);
   }
@@ -36,86 +36,6 @@ async function loadAllSheets() {
   if (slides.length > 0) {
     showSlide(0);
   }
-}
-
-async function loadCSV(url) {
-  try {
-    const res = await fetch(url + '&t=' + Date.now());
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const text = await res.text();
-    const rows = text.trim().split(/\r?\n/);
-    return rows.map(r => r.split(/,|;|\t/));
-  } catch (e) {
-    console.error(e);
-    return [['Ошибка загрузки']];
-  }
-}
-
-function renderTable(data) {
-  const tbl = document.createElement('table');
-  data.forEach((row, i) => {
-    const tr = document.createElement('tr');
-    row.forEach(cell => {
-      const el = document.createElement(i === 0 ? 'th' : 'td');
-      el.textContent = cell;
-      tr.appendChild(el);
-    });
-    tbl.appendChild(tr);
-  });
-  return tbl;
-}
-//Сдесь
-//был
-//Ярик
-function renderLeaderCard(data) {
-  if (!data || data.length < 2) {
-    return document.createTextNode("Нет данных для лидера");
-  }
-
-  const headers = data[0].map(h => h.trim()); // убираем лишние пробелы
-  const rows = data.slice(1).filter(r => r.some(cell => cell.trim() !== ''));
-
-  // ищем колонку с очками
-  const scoreIndex = headers.findIndex(h => /очк|score|points/i.test(h));
-  if (scoreIndex === -1) {
-    return document.createTextNode("Не найдена колонка с очками");
-  }
-
-  // ищем колонку с именем
-  const nameIndex = headers.findIndex(h => /имя|name|player/i.test(h));
-
-  // находим лидера
-  let leader = rows[0];
-  let maxScore = parseFloat(rows[0][scoreIndex]) || 0;
-
-  for (let r of rows) {
-    const score = parseFloat(r[scoreIndex]) || 0;
-    if (score > maxScore) {
-      maxScore = score;
-      leader = r;
-    }
-  }
-
-  // создаём карточку
-  const card = document.createElement('div');
-  card.classList.add('leader-card');
-
-  const title = document.createElement('h2');
-  title.textContent = 'Лидер дня';
-
-  const playerName = nameIndex !== -1 ? leader[nameIndex] : 'Неизвестный';
-  const player = document.createElement('p');
-  player.textContent = `Игрок: ${playerName}`;
-
-  const score = document.createElement('p');
-  score.classList.add('score');
-  score.textContent = `Очки: ${maxScore}`;
-
-  card.appendChild(title);
-  card.appendChild(player);
-  card.appendChild(score);
-
-  return card;
 }
 
 function showSlide(index) {
@@ -140,10 +60,11 @@ document.querySelector('.next').addEventListener('click', () => {
   }
 });
 
-setInterval(() => {
-  if (slides.length > 0) {
-    showSlide((currentIndex + 1) % slides.length);
-  }
-}, 10000);
+// // Автопереключение
+// setInterval(() => {
+//   if (slides.length > 0) {
+//     showSlide((currentIndex + 1) % slides.length);
+//   }
+// }, 10000);
 
 loadAllSheets();
