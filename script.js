@@ -1,5 +1,5 @@
 const sheetUrls = [
-  'https://docs.google.com/spreadsheets/d/e/2PACX-1vT8Wbncz4v1KVonBklHjC1iIqkyz6sRzIqGbtP_Yh9xin-agP4Gx6HCSq-tq1deLCkmPTs63VKaF9rW/pub?output=csv'
+'https://docs.google.com/spreadsheets/d/e/2PACX-1vT8Wbncz4v1KVonBklHjC1iIqkyz6sRzIqGbtP_Yh9xin-agP4Gx6HCSq-tq1deLCkmPTs63VKaF9rW/pub?output=csv'
 ];
 
 let currentIndex = 0;
@@ -37,35 +37,11 @@ async function loadAllSheets() {
 
 async function loadCSV(url) {
   try {
-    const res = await fetch(url);
+    const res = await fetch(url + '&t=' + Date.now());
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const text = await res.text();
-    // Стабильный CSV парсер: поддержка кавычек, запятых внутри ячеек
-    // Используем регулярку для разбора строк
-    const rows = text.trim().split(/\r?\n/).map(line => {
-      const result = [];
-      let cell = '';
-      let inQuotes = false;
-      for (let i = 0; i < line.length; i++) {
-        const char = line[i];
-        if (char === '"') {
-          if (inQuotes && line[i+1] === '"') {
-            cell += '"';
-            i++;
-          } else {
-            inQuotes = !inQuotes;
-          }
-        } else if (char === ',' && !inQuotes) {
-          result.push(cell.trim());
-          cell = '';
-        } else {
-          cell += char;
-        }
-      }
-      result.push(cell.trim());
-      return result;
-    });
-    return rows;
+    const rows = text.trim().split(/\r?\n/);
+    return rows.map(r => r.split(/,|;|\t/));
   } catch (e) {
     console.error(e);
     return [['Ошибка загрузки']];
@@ -87,38 +63,14 @@ function renderTable(data) {
 }
 
 function renderLeaderCard(data) {
-  // Отладочная карточка
-  const debugCard = document.createElement('div');
-  debugCard.classList.add('leader-card');
+  // предполагаем, что заголовки в первой строке
+  const headers = data[0];
+  const rows = data.slice(1);
 
-  if (!data || data.length < 2) {
-    debugCard.innerHTML = `<b>Нет данных для лидера</b><br>data: ${JSON.stringify(data)}`;
-    return debugCard;
-  }
-
-  const headers = data[0].map(h => h.trim());
-  const rows = data.slice(1).filter(r => r.some(cell => cell.trim() !== ''));
-
-  // debug: показать заголовки и количество строк
-  const info = document.createElement('div');
-  info.style.fontSize = '0.9em';
-  info.style.color = '#ccc';
-  info.innerHTML = `Заголовки: ${headers.join(', ')}<br>Строк данных: ${rows.length}`;
-  debugCard.appendChild(info);
-
-  // ищем колонку с очками
-  const scoreIndex = headers.findIndex(h => /очк|score|points/i.test(h));
+  // ищем колонку "Очки" (или "Score")
+  const scoreIndex = headers.findIndex(h => /очк|score/i.test(h));
   if (scoreIndex === -1) {
-    debugCard.innerHTML += `<br><b>Не найдена колонка с очками</b>`;
-    return debugCard;
-  }
-
-  // ищем колонку с именем
-  const nameIndex = headers.findIndex(h => /имя|name|player/i.test(h));
-
-  if (rows.length === 0) {
-    debugCard.innerHTML += `<br><b>Нет строк с данными</b>`;
-    return debugCard;
+    return document.createTextNode("Не найдена колонка 'Очки'");
   }
 
   // находим лидера
@@ -134,22 +86,27 @@ function renderLeaderCard(data) {
   }
 
   // создаём карточку
+  const card = document.createElement('div');
+  card.classList.add('leader-card');
+
+  const nameIndex = headers.findIndex(h => /имя|name/i.test(h));
+  const name = nameIndex !== -1 ? leader[nameIndex] : 'Неизвестный';
+
   const title = document.createElement('h2');
   title.textContent = 'Лидер дня';
 
-  const playerName = nameIndex !== -1 ? leader[nameIndex] : 'Неизвестный';
   const player = document.createElement('p');
-  player.textContent = `Игрок: ${playerName}`;
+  player.textContent = `Игрок: ${name}`;
 
   const score = document.createElement('p');
   score.classList.add('score');
   score.textContent = `Очки: ${maxScore}`;
 
-  debugCard.appendChild(title);
-  debugCard.appendChild(player);
-  debugCard.appendChild(score);
+  card.appendChild(title);
+  card.appendChild(player);
+  card.appendChild(score);
 
-  return debugCard;
+  return card;
 }
 
 function showSlide(index) {
