@@ -50,7 +50,8 @@ async function loadCSV(url) {
 
 function renderTable(data) {
   const tbl = document.createElement('table');
-  data.forEach((row, i) => {
+  const maxRows = 50;
+  data.slice(0, maxRows).forEach((row, i) => {
     const tr = document.createElement('tr');
     row.forEach(cell => {
       const el = document.createElement(i === 0 ? 'th' : 'td');
