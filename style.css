@@ -1,46 +1,62 @@
+/* ...existing code... */
 body {
   margin: 0;
   padding: 0;
-  height: 100%;
-  width: 100%;
-  background: #0b1020;
+  min-height: 100vh;
+  width: 100vw;
+  background: linear-gradient(120deg, #0b1020 60%, #223 100%);
   color: #fff;
-  font-family: sans-serif;
+  font-family: 'Segoe UI', Arial, sans-serif;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .slider {
   position: relative;
-  width: 80%;
-  max-width: 900px;
-  overflow: hidden;
+  width: 90vw;
+  max-width: 950px;
+  margin: 40px auto 0 auto;
+  overflow: visible;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  border-radius: 18px;
+  background: rgba(20,30,60,0.95);
+  padding: 24px 18px 40px 18px;
 }
 
 .slider table {
   width: 100%;
   border-collapse: collapse;
-  background: rgba(20,30,60,0.9);
+  background: transparent;
+  max-height: 600px;
+  overflow-y: auto;
+  display: block;
 }
 
 .slider th, .slider td {
   border: 1px solid #446;
-  padding: 8px 12px;
+  padding: 10px 14px;
   text-align: center;
+  font-size: 1.08em;
+  transition: background 0.2s;
 }
 
 .slider th {
   background: #334;
-  font-size: 1.1em;
+  font-size: 1.15em;
+  position: sticky;
+  top: 0;
+  z-index: 2;
 }
 
 .slider td {
   background: #223;
-  font-size: 1em;
 }
 
-/* Анимация плавной смены */
+.slider tr:hover td {
+  background: #2a3a5a;
+}
+
 .slide {
   display: none;
   opacity: 0;
@@ -52,17 +68,23 @@ body {
   opacity: 1;
 }
 
-/* Кнопки навигации */
 .nav {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(0,0,0,0.5);
+  background: rgba(0,0,0,0.7);
   border: none;
-  color: white;
-  font-size: 2em;
-  padding: 10px;
+  color: #ffd700;
+  font-size: 2.2em;
+  padding: 12px 18px;
   cursor: pointer;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  transition: background 0.2s;
+}
+
+.nav:hover {
+  background: #334;
 }
 
 .nav.prev {
@@ -72,6 +94,7 @@ body {
 .nav.next {
   right: 10px;
 }
+
 .leader-card {
   display: flex;
   flex-direction: column;
@@ -79,7 +102,7 @@ body {
   background: linear-gradient(135deg, #223, #334);
   border: 2px solid #446;
   border-radius: 16px;
-  padding: 20px;
+  padding: 28px 24px;
   color: #fff;
   box-shadow: 0 0 20px rgba(0,0,0,0.5);
   max-width: 400px;
@@ -87,54 +110,36 @@ body {
 }
 
 .leader-card h2 {
-  margin: 0;
-  font-size: 1.5em;
+  margin: 0 0 10px 0;
+  font-size: 1.7em;
   color: #ffd700;
+  letter-spacing: 1px;
 }
 
 .leader-card p {
-  margin: 5px 0;
-  font-size: 1.1em;
+  margin: 7px 0;
+  font-size: 1.15em;
 }
 
 .leader-card .score {
-  font-size: 1.3em;
+  font-size: 1.35em;
   font-weight: bold;
   color: #0f0;
-}
-.slider {
-  position: relative;
-  width: 80%;
-  max-width: 900px;
-  overflow: hidden;
-  min-height: 250px; /* чтобы карточка и таблица не дергали слайдер */
+  margin-top: 8px;
 }
 
-.slide {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  opacity: 0;
-  transition: opacity 1s ease;
-  pointer-events: none; /* чтобы скрытые слайды не мешали */
+@media (max-width: 700px) {
+  .slider {
+    width: 98vw;
+    padding: 8px 2vw 32px 2vw;
+  }
+  .leader-card {
+    padding: 16px 8px;
+    font-size: 0.95em;
+  }
+  .slider th, .slider td {
+    padding: 7px 4px;
+    font-size: 0.95em;
+  }
 }
-
-.slide.active {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-/* Кнопка паузы */
-.pause-btn {
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-  background: rgba(0,0,0,0.5);
-  color: #fff;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 1em;
-}
+/* ...existing code... */
