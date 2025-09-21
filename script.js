@@ -1,6 +1,5 @@
 const sheetUrls = [
-  'upload/import_empl_csv.csv',
-  'upload/import_empl_csv.csv'
+  'https://docs.google.com/spreadsheets/d/e/2PACX-1vT8Wbncz4v1KVonBklHjC1iIqkyz6sRzIqGbtP_Yh9xin-agP4Gx6HCSq-tq1deLCkmPTs63VKaF9rW/pub?output=csv'
 ];
 
 let currentIndex = 0;
